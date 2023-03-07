@@ -8,38 +8,31 @@ int main() {
 	cin.tie(NULL);
 
 	int t, k, n;
-	int max_num, min_num;
 	char ins;
 	cin >> t;
 	while (t--) {
-		multiset<int> min_ms;
-		multiset<int, greater<int>> max_ms;
+		multiset<int> ms;
 		cin >> k;
 		while (k--) {
 			cin >> ins >> n;
 			if (ins == 'I') {
-				min_ms.insert(n);
-				max_ms.insert(n);
+				ms.insert(n);
 			}
 			else {
-				if (min_ms.empty()) continue;
+				if (ms.empty()) continue;
 
 				if (n == 1) {
-					max_num = *max_ms.begin();
-					min_ms.erase(min_ms.lower_bound(max_num));
-					max_ms.erase(max_ms.begin());
+					ms.erase(--ms.end());
 				}
 				else {
-					min_num = *min_ms.begin();
-					min_ms.erase(min_ms.begin());
-					max_ms.erase(max_ms.lower_bound(min_num));
+					ms.erase(ms.begin());
 				}
 			}
 		}
 
-		if (min_ms.empty()) cout << "EMPTY\n";
+		if (ms.empty()) cout << "EMPTY\n";
 		else {
-			cout << *max_ms.begin() << " " << *min_ms.begin() << "\n";
+			cout << *(--ms.end()) << " " << *ms.begin() << "\n";
 		}
 	}
 
