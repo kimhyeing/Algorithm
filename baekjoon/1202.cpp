@@ -1,6 +1,7 @@
 #include<iostream>
 #include<set>
 #include<map>
+#include<vector>
 
 using namespace std;
 
@@ -26,17 +27,10 @@ int main() {
 		v = (*jewel.begin()).first;
 		m = (*jewel.begin()).second;
 
-		auto upper = bag.upper_bound(m);
-		auto lower = bag.lower_bound(m);
-
 		jewel.erase(jewel.begin());
-		if (lower != bag.end()) {
-			bag.erase(lower);
+		if (bag.lower_bound(m) != bag.end()) {
+			bag.erase(bag.lower_bound(m));
 			res += v;
-		}	
-		else if (upper != bag.end()) {
-			bag.erase(upper);
-			res += v;	
 		}
 	}
 	cout << res;
