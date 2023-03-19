@@ -5,25 +5,25 @@ using namespace std;
 
 int r, c, newx, newy, res = 1;
 char arr[21][21];
-int visit[28];
+bool visit[28];
 int posx[4] = { -1, 0, 1, 0 };
 int posy[4] = { 0, 1, 0, -1 };
 
 void dfs(int x, int y, int count) {
-	visit[(arr[x][y] - 'A')]++;
+	visit[(arr[x][y] - 'A')] = true;
 
 	for (int i = 0; i < 4; i++) {
 		newx = x + posx[i];
 		newy = y + posy[i];
 		if (newx < 0 || newy < 0 || newx >= r || newy >= c)
 			continue;
-		if (visit[(arr[newx][newy] - 'A')] == 0) {
+		if (!visit[(arr[newx][newy] - 'A')]) {
 			res = max(res, count + 1);
 			dfs(newx, newy, count + 1);
 		}
 	}
 
-	visit[(arr[x][y] - 'A')]--;
+	visit[(arr[x][y] - 'A')] = false;
 }
 
 
