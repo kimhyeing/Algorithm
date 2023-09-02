@@ -1,41 +1,49 @@
-#include<iostream>
-#include<vector>
+#include "iostream"
+#include "vector"
+#include "cstring"
 
 using namespace std;
 
-vector<pair<int, int>>v[10001];
-int visit[10001];
-int last;
-int result;
+const int MAX = 1e5+1;
+vector<pair<int, int> > tree[MAX];
+int visit[MAX];
+int n, res, last;
 
-void dfs(int n, int len) {
-	visit[n] = 1;
-	if (len > result) {
-		result = len;
-		last = n;
-	}
-	for (int i = 0; i < v[n].size(); i++) {
-		int node = v[n][i].first;
-		if (visit[node] == 0)
-			dfs(node, len + v[n][i].second);
-	}
+void input() {
+    cin>>n;
+    int a,b,w;
+    for(int i=0;i<n-1;i++) {
+        cin>>a>>b>>w;
+        tree[a].push_back(make_pair(b,w));
+        tree[b].push_back(make_pair(a,w));
+    }
+}
+
+void dfs(int cur, int sum) {
+    visit[cur] = 1;
+    for (int i=0;i<tree[cur].size();i++) {
+        int child = tree[cur][i].first;
+        if(!visit[child]) {
+            dfs(child, sum + tree[cur][i].second);
+        }
+    }
+    if(res < sum) {
+        last = cur;
+        res = sum;
+    }
+}
+
+void solve() {
+    dfs(1, 0);
+    memset(visit, 0, sizeof(visit));
+    dfs(last, 0);
 }
 
 int main() {
-	int n;
-	cin >> n;
-	int a, b, c;
-
-	for (int i = 0; i < n - 1; i++) {
-		cin >> a >> b >> c;
-		v[a].push_back(make_pair(b, c));
-		v[b].push_back(make_pair(a, c));
-	}
-
-	dfs(1, 0);
-	fill_n(visit, n+1, 0);
-	result = 0;
-	dfs(last, 0);
-	cout << result;
-	return 0;
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr); cout.tie(nullptr);
+    input();
+    solve();
+    cout<<res;
+    return 0;
 }
