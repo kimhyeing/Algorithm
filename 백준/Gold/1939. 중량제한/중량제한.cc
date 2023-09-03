@@ -23,8 +23,7 @@ int bfs() {
         if(cur == dest) {
             res = max(res, w);
         }
-        else {
-            if(visit[cur] > w) continue;
+        else if(visit[cur] <= w) {
             for (int i=0;i<graph[cur].size();i++) {
                 child = graph[cur][i].first;
                 child_w = graph[cur][i].second;
@@ -40,8 +39,6 @@ int bfs() {
 }
 
 void input() {
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr); cout.tie(nullptr);
     cin>>n>>m;
     int a,b,c;
     for(int i=0;i<m;i++) {
@@ -52,6 +49,8 @@ void input() {
     cin>>start>>dest;
 }
 int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr); cout.tie(nullptr);
     input();
     cout<<bfs();
     return 0;
