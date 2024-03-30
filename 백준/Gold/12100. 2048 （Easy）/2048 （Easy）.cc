@@ -6,14 +6,6 @@ using namespace std;
 
 int n;
 
-void print(vector<vector<int> >& v) {
-    for(int i=0;i<n;i++) {
-        for(int j=0;j<n;j++) {
-            cout<<v[i][j]<<" ";
-        }
-        cout<<"\n";
-    }
-}
 int left(vector<vector<int> >& v) {
     int empty_pos, v_pos, max_value = 0;
     for(int i=0;i<n;i++) {
@@ -43,7 +35,6 @@ int left(vector<vector<int> >& v) {
             }
         }
     }
- //   print(v);
     return max_value;
 }
 int right(vector<vector<int> >& v) {
@@ -75,9 +66,9 @@ int right(vector<vector<int> >& v) {
             }
         }
     }
- //   print(v);
     return max_value;
 }
+
 int down(vector<vector<int> >& v) {
     int empty_pos, v_pos, max_value = 0;
     for(int j=0;j<n;j++) {
@@ -107,9 +98,9 @@ int down(vector<vector<int> >& v) {
             }
         }
     }
-  //  print(v);
     return max_value;
 }
+
 int up(vector<vector<int> >& v) {
     int empty_pos, v_pos, max_value = 0;
     for(int j=0;j<n;j++) {
@@ -139,31 +130,22 @@ int up(vector<vector<int> >& v) {
             }
         }
     }
-   //print(v);
     return max_value;
 }
 
 int result = 0;
 void solve(vector<vector<int> > v, int c) {
-    //cout<<"----------------\n";
-    //cout<<"c : "<<c<<"\n";
     if(c == 5) return;
     vector<vector<int> >temp_v;
     temp_v = v;
     result = max(result, down(temp_v));
     solve(temp_v, c+1);
-    //cout<<"----------------\n";
-    //cout<<"c : "<<c<<"\n";
     temp_v = v;
     result = max(result, right(temp_v));
     solve(temp_v, c+1);
-    //cout<<"----------------\n";
-    //cout<<"c : "<<c<<"\n";
     temp_v = v;
     result = max(result, up(temp_v));
     solve(temp_v, c+1);
-    //cout<<"----------------\n";
-    //cout<<"c : "<<c<<"\n";
     temp_v = v;
     result = max(result, left(temp_v));
     solve(temp_v, c+1);
