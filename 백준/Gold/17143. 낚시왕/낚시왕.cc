@@ -13,11 +13,8 @@ struct Shark{
     int d;
     int z;
 };
-int R,C,M;
+int R,C,M, k_idx, result;
 Shark sea[101][101];
-int k_idx, result;
-int dirx[4] = {-1, 1, 0, 0};
-int diry[4] = {0,0,1,-1};
 Shark empty_shark = {0,0,0,0,0,0};
 map<int, Shark>um;
 
