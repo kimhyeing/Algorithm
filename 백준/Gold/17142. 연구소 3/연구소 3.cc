@@ -11,16 +11,8 @@ int arr[50][50];
 int root[50][50];
 int dirx[4] = {-1, 0, 1, 0};
 int diry[4] = {0, 1,0, -1};
-
-void print() {
-    for(int i=0;i<n;i++) {
-        for(int j=0;j<n;j++) {
-            cout<<root[i][j]<<" ";
-        }
-        cout<<"\n";
-    }
-    cout<<"\n";
-}
+vector<int>idx_list;
+int res = INT32_MAX;
 
 void input() {
     cin>>n>>m;
@@ -35,9 +27,6 @@ void input() {
     }
     vl = virus_list.size();
 }
-
-vector<int>idx_list;
-int res = INT32_MAX;
 
 int bfs() {
     queue<pair<int, int> >q;
