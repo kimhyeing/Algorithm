@@ -1,207 +1,155 @@
-#include<iostream>
-#include<vector>
-#include<algorithm>
-#include<cstring>
-#include<string>
+#include <iostream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 
-struct fish {
-	int x;
-	int y;
-	int d;
-};
-
 int m, s, sx, sy;
-int posx[8] = { 0,-1,-1, -1,0,1,1,1 };
-int posy[8] = { -1,-1,0,1,1,1,0,-1 };
-vector<fish> arr[6][6];
-vector<fish> temp_arr[6][6];
-vector<fish> default_arr[6][6];
-bool visit[6][6];
-int real_move[3];
-int smell_list[6][6];
-vector<pair<int, int>>sv;
+vector<int>arr[4][4];
+vector<int>tempArr[4][4];
+bool visited[4][4];
+int smell[4][4];
+int dirx[8] = { 0,-1,-1,-1,0,1,1,1 };
+int diry[8] = { -1,-1,0,1,1,1,0,-1 };
+int dirSx[4] = { -1,0,1,0 };
+int dirSy[4] = { 0,-1,0,1 };
 
 void input() {
 	cin >> m >> s;
 	int x, y, d;
 	for (int i = 0; i < m; i++) {
 		cin >> x >> y >> d;
-		arr[x][y].push_back({ x,y, d - 1});
+		arr[x - 1][y - 1].push_back(d-1);
 	}
 	cin >> sx >> sy;
+	sx--; sy--;
 }
 
-void move() {
-	int x, y, newx, newy, newd;
-	fish f;
-	bool success;
-	int rc = 0;
-	for (int i = 1; i <= 4; i++) {
-		for (int j = 1; j <= 4; j++) {
-			for (int k = 0; k < arr[i][j].size(); k++) {
-				
-				f = arr[i][j][k];
-				x = f.x;
-				y = f.y;
-				newd = f.d;
-				success = true;
-				rc = 0;
-				while (true) {
-					if (rc > 7) {
-						success = false;
-						newd = f.d;
-						break;
+void moveFish() {
+	bool isMove;
+	int len,newx, newy, newd;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			len = arr[i][j].size();
+			for (int t = 0; t < len; t++) {
+				isMove = false;
+				newd = arr[i][j][t];
+				for (int d = 0; d < 8; d++) {
+					if (d > 0) {
+						newd -= 1;
+						if (newd == -1) newd = 7;
 					}
-					newx = x + posx[newd];
-					newy = y + posy[newd];
-					rc++;
-
-					if (newx < 1 || newy < 1 || newx > 4 || newy > 4 || (newx == sx && newy == sy) || smell_list[newx][newy] > 0) {
-						newd = newd - 1;
-						if (newd < 0) newd += 8;
-						continue;
-					}
+					newx = i + dirx[newd];
+					newy = j + diry[newd];
+					if (newx < 0 || newy < 0 || newx >= 4 || newy >= 4) continue;
+					if (smell[newx][newy] > 0 || (newx == sx && newy == sy)) continue;
+					isMove = true;
 					break;
 				}
-				if (success) {
-					x = newx;
-					y = newy;
+				
+				if (!isMove) {
+					newx = i;
+					newy = j;
+					newd = arr[i][j][t];
 				}
-				temp_arr[x][y].push_back({ x,y,newd });
+				tempArr[newx][newy].push_back(newd);
 			}
 		}
 	}
 }
 
-bool avail(int x, int y) {
-	if (x < 1 || y < 1 || x > 4 || y > 4)
-		return false;
-	return true;
-}
-void move_shark() {
-	int p[4] = { 2,0,6,4 };
-	int d;
-	int newx, newy;
-	int one_sx, one_sy, two_sx, two_sy, three_sx, three_sy;
-	int sum, real_sum = -1;
+int fishCnt, newx, newy;
+vector<int>sharkDir;
+void moveShark(int x, int y, vector<int>dlist, int cnt, bool vs[4][4]) {
+	if (dlist.size() == 3) {
+		if (fishCnt < cnt) {
+			sharkDir = dlist;
+			fishCnt = cnt;
+		}
+		return;
+	}
 
 	for (int i = 0; i < 4; i++) {
-		d = p[i];
-		sum = 0;
-		one_sx = sx;
-		one_sy = sy;
-		newx = one_sx + posx[d];
-		newy = one_sy + posy[d];
-		if (!avail(newx, newy))
-			continue;
+		newx = x + dirSx[i];
+		newy = y + dirSy[i];
+		if (newx < 0 || newy < 0 || newx >= 4 || newy >= 4) continue;
+		bool tempVisited[4][4];
+		copy(&vs[0][0], &vs[3][4], &tempVisited[0][0]);
+		dlist.push_back(i);
+		if (tempVisited[newx][newy]) {
+			moveShark(newx, newy, dlist, cnt, tempVisited);
+		}
+		else {
+			tempVisited[newx][newy] = true;
+			moveShark(newx, newy, dlist, cnt + tempArr[newx][newy].size(), tempVisited);
+		}
+		dlist.pop_back();
+	}
+}
 
-		sum += temp_arr[newx][newy].size();
-		two_sx = newx;
-		two_sy = newy;
+void makeSmell() {
+	for (int i = 0; i < 3; i++) {
+		sx += dirSx[sharkDir[i]];
+		sy += dirSy[sharkDir[i]];
+		if (tempArr[sx][sy].empty()) continue;
+		tempArr[sx][sy].clear();
+		smell[sx][sy] = 3;
+	}
+}
+
+void decSmell() {
+	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			d = p[j];
-			newx = two_sx + posx[d];
-			newy = two_sy + posy[d];
-			if (!avail(newx, newy))
-				continue;
-			sum += temp_arr[newx][newy].size();
-			three_sx = newx;
-			three_sy = newy;
-			for (int k = 0; k < 4; k++) {
-				d = p[k];
-				newx = three_sx + posx[d];
-				newy = three_sy + posy[d];
-				if (!avail(newx, newy))
-					continue;
-				if (newx != two_sx || newy != two_sy) {
-					sum += temp_arr[newx][newy].size();
-					if (sum > real_sum) {
-						real_sum = sum;
-						real_move[0] = p[i];
-						real_move[1] = p[j];
-						real_move[2] = p[k];
-					}
-					sum -= temp_arr[newx][newy].size();
-				}
-				else {
-					if (sum > real_sum) {
-						real_sum = sum;
-						real_move[0] = p[i];
-						real_move[1] = p[j];
-						real_move[2] = p[k];
-					}
-				}
-			}
-			sum -= temp_arr[three_sx][three_sy].size();
-
+			if (smell[i][j] == 0) continue;
+			smell[i][j] -= 1;
 		}
 	}
 }
 
-void reduce_smell() {
-	for (int i = 1; i <= 4; i++) {
-		for (int j = 1; j <= 4; j++) {
-			if (smell_list[i][j] > 0)
-				smell_list[i][j]--;
-		}
-	}
-}
-
-void copy_fish() {
-	for (int i = 1; i <= 4; i++) {
-		for (int j = 1; j <= 4; j++) {
-			for (int k = 0; k < temp_arr[i][j].size(); k++) {
-				arr[i][j].push_back(temp_arr[i][j][k]);
+void copyFish() {
+	int len;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			len = tempArr[i][j].size();
+			for (int t = 0; t < len; t++) {
+				arr[i][j].push_back(tempArr[i][j][len - 1 - t]);
+				tempArr[i][j].pop_back();
 			}
 		}
 	}
-	copy(&default_arr[0][0], &default_arr[5][5], &temp_arr[0][0]);
 }
 
-long long int cal() {
-	long long int res = 0;
-	for (int i = 1; i <= 4; i++) {
-		for (int j = 1; j <= 4; j++) {
-			res += arr[i][j].size();
+int getResult() {
+	int result = 0;
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			result += arr[i][j].size();
 		}
 	}
-	return res;
+	return result;
 }
+
+void solve() {
+	vector<int>templist;
+	for (int i = 0; i < s; i++) {
+		moveFish();
+
+		fishCnt = -1;
+		moveShark(sx, sy, templist, 0, visited);
+		
+		makeSmell();
+
+		decSmell();
+
+		copyFish();
+	}
+}
+
 int main() {
 	ios::sync_with_stdio(false);
-	cout.tie(NULL);
 	cin.tie(NULL);
-
 	input();
-	
-	int newx, newy,temp_sx, temp_sy;
-	for (int i = 0; i < s; i++) {
-		move();
-		move_shark();
-		
-		temp_sx = sx;
-		temp_sy = sy;
-		reduce_smell();
-		for (int j = 0; j < 3; j++) {
-			newx = temp_sx + posx[real_move[j]];
-			newy = temp_sy + posy[real_move[j]];
-
-			if (temp_arr[newx][newy].size() > 0) {
-				smell_list[newx][newy] = 2;
-			}
-			temp_arr[newx][newy].clear();
-			temp_sx = newx;
-			temp_sy = newy;
-		}
-		
-		sx = temp_sx;
-		sy = temp_sy;
-
-		copy_fish();
-	}
-	cout << cal();
-	
+	solve();
+	cout << getResult();
 	return 0;
 }
