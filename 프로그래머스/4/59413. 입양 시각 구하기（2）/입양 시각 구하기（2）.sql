@@ -1,16 +1,14 @@
--- 코드를 입력하세요
-with recursive entire as (
-    select 0 as n
+with recursive hours as(
+    select 0 as hour
     union all
-    select n+1
-    from entire
-    where n < 23
+    select hour+1
+    from hours
+    where hour < 23
 )
 
-select entire.n, ifnull(c, 0)
-from entire left join ( SELECT hour(datetime) as h, count(animal_id) as c
-                        from animal_outs
-                        group by h
-                        order by h ) a
-on entire.n = a.h
-order by entire.n
+select b.hour, count(a.animal_id) as count
+from (select animal_id, hour(DATETIME) as hour from animal_outs) as a
+    right join hours as b
+    on a.hour = b.hour
+group by b.hour
+order by b.hour
